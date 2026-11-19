@@ -68,16 +68,23 @@
 
   /* ---------- product illustrations ---------- */
   function pack(p, cls) {
-    var k = p.pack, ink = '#2F4A3C', b = k.body || '#FBFAF6', c = k.cap, sh = '', ly = 140;
+    /* Unbranded pack render: no wordmark, only a plain product-type line. */
+    var k = p.pack, ink = '#2F4A3C', b = k.body || '#FBFAF6', c = k.cap, parts, ly = 140, label = '';
     var en = p.en.split('|');
-    if (k.shape === 'bottle') { sh = '<rect x="83" y="16" width="34" height="38" rx="5" fill="' + c + '"/><rect x="58" y="52" width="84" height="172" rx="22" fill="' + b + '" stroke="#BFCBBE"/>'; ly = 132; }
-    else if (k.shape === 'pump') { sh = '<path d="M68 22h36a6 6 0 0 1 6 6v6H68z" fill="' + c + '"/><rect x="94" y="32" width="12" height="26" fill="' + c + '"/><rect x="82" y="56" width="36" height="18" rx="4" fill="' + c + '"/><rect x="60" y="72" width="80" height="152" rx="14" fill="' + b + '" stroke="#BFCBBE"/>'; ly = 142; }
-    else if (k.shape === 'tube') { sh = '<path d="M66 34a16 16 0 0 1 16-16h36a16 16 0 0 1 16 16v158H66z" fill="' + b + '" stroke="#BFCBBE"/><rect x="76" y="192" width="48" height="32" rx="6" fill="' + c + '"/>'; ly = 100; }
-    else if (k.shape === 'jar') { sh = '<rect x="46" y="96" width="108" height="32" rx="8" fill="' + c + '"/><rect x="40" y="126" width="120" height="98" rx="16" fill="' + b + '" stroke="#BFCBBE"/>'; ly = 168; }
-    else { sh = '<rect x="88" y="10" width="24" height="44" rx="12" fill="' + c + '"/><rect x="80" y="52" width="40" height="18" rx="3" fill="' + c + '"/><rect x="60" y="68" width="80" height="156" rx="16" fill="' + b + '" stroke="rgba(31,42,36,.18)"/><rect x="66" y="112" width="68" height="72" rx="5" fill="#FBFAF6"/>'; ly = 140; }
-    var t = function (y, s) { return '<text x="100" y="' + y + '" text-anchor="middle" font-family="system-ui,sans-serif" font-size="6.6" letter-spacing=".7" fill="' + ink + '" opacity=".85">' + esc(s || '') + '</text>'; };
-    return '<svg class="pack ' + (cls || '') + '" viewBox="0 0 200 240" direction="ltr" style="direction:ltr" role="img" aria-label="' + esc(p.name) + '"><ellipse cx="100" cy="229" rx="60" ry="6" fill="#1F2A24" opacity=".1"/>' + sh +
-      '<text x="100" y="' + ly + '" text-anchor="middle" font-family="\'El Messiri\',serif" font-weight="700" font-size="15" fill="' + ink + '">Cosmetics</text>' + t(ly + 16, en[0]) + t(ly + 27, en[1]) + '</svg>';
+    if (k.shape === 'bottle') { parts = [['<rect x="83" y="16" width="34" height="38" rx="5"', c], ['<rect x="58" y="52" width="84" height="172" rx="22" stroke="#BFCBBE"', b]]; ly = 136; }
+    else if (k.shape === 'pump') { parts = [['<path d="M68 22h36a6 6 0 0 1 6 6v6H68z"', c], ['<rect x="94" y="32" width="12" height="26"', c], ['<rect x="82" y="56" width="36" height="18" rx="4"', c], ['<rect x="60" y="72" width="80" height="152" rx="14" stroke="#BFCBBE"', b]]; ly = 146; }
+    else if (k.shape === 'tube') { parts = [['<path d="M66 34a16 16 0 0 1 16-16h36a16 16 0 0 1 16 16v158H66z" stroke="#BFCBBE"', b], ['<rect x="76" y="192" width="48" height="32" rx="6"', c]]; ly = 104; }
+    else if (k.shape === 'jar') { parts = [['<rect x="46" y="96" width="108" height="32" rx="8"', c], ['<rect x="40" y="126" width="120" height="98" rx="16" stroke="#BFCBBE"', b]]; ly = 174; }
+    else { parts = [['<rect x="88" y="10" width="24" height="44" rx="12"', c], ['<rect x="80" y="52" width="40" height="18" rx="3"', c], ['<rect x="60" y="68" width="80" height="156" rx="16" stroke="rgba(31,42,36,.18)"', b]]; label = '<rect x="66" y="116" width="68" height="62" rx="5" fill="#FBFAF6"/>'; ly = 144; }
+    var gid = 'sh' + (k.shape || 'd');
+    var base = parts.map(function (x) { return x[0] + ' fill="' + x[1] + '"/>'; }).join('');
+    var shade = parts.map(function (x) { return x[0].replace(/ stroke="[^"]*"/, '') + ' fill="url(#' + gid + ')"/>'; }).join('');
+    var t = function (y, s) { return '<text x="100" y="' + y + '" text-anchor="middle" font-family="system-ui,sans-serif" font-size="7.4" font-weight="600" letter-spacing=".9" fill="' + ink + '" opacity=".8">' + esc(s || '') + '</text>'; };
+    return '<svg class="pack ' + (cls || '') + '" viewBox="0 0 200 240" direction="ltr" style="direction:ltr" role="img" aria-label="' + esc(p.name) + '">' +
+      '<defs><linearGradient id="' + gid + '" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#000" stop-opacity=".16"/><stop offset=".2" stop-color="#fff" stop-opacity=".5"/><stop offset=".42" stop-color="#fff" stop-opacity="0"/><stop offset=".8" stop-color="#000" stop-opacity=".05"/><stop offset="1" stop-color="#000" stop-opacity=".2"/></linearGradient>' +
+      '<radialGradient id="gr' + gid + '"><stop offset="0" stop-color="#1F2A24" stop-opacity=".28"/><stop offset="1" stop-color="#1F2A24" stop-opacity="0"/></radialGradient></defs>' +
+      '<ellipse cx="100" cy="227" rx="74" ry="9" fill="url(#gr' + gid + ')"/>' + base + shade + label +
+      '<line x1="86" x2="114" y1="' + (ly - 12) + '" y2="' + (ly - 12) + '" stroke="' + ink + '" stroke-width="1" opacity=".5"/>' + t(ly, en[0]) + t(ly + 11, en[1]) + '</svg>';
   }
   function texture(p, cls) {
     return '<svg class="pack tex ' + (cls || '') + '" viewBox="0 0 200 240" role="img" aria-label="قوام المنتج"><path d="M40 130c-6-40 30-78 72-70 40 8 60 42 46 80-12 34-52 50-86 36-18-8-28-24-32-46z" fill="' + p.pack.tint + '" stroke="#BFCBBE"/><path d="M70 120c10-20 34-28 54-18" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".8"/></svg>';
@@ -129,7 +136,7 @@
       '<div><a class="logo" href="index.html" dir="ltr">Cosmetics<span>.</span></a><p>عناية يومية بالبشرة والشعر بتركيبات واضحة المكونات.</p><a href="#" data-act="soon">Instagram</a><a href="#" data-act="soon">Facebook</a><a href="#" data-act="soon">TikTok</a></div>' +
       '<div><h3>استكشفي</h3><a href="shop.html">المتجر</a><a href="bundles.html">المجموعات</a><a href="routine.html">اختبار الروتين</a><a href="membership.html">العضوية والنقاط</a><a href="about.html">من نحن</a></div>' +
       '<div><h3>السياسات</h3><a href="policies.html#privacy">سياسة الخصوصية</a><a href="policies.html#returns">الاستبدال والاسترجاع والتوصيل</a><a href="policies.html#terms">شروط الخدمة</a><a href="about.html#faq">الأسئلة الشائعة</a></div>' +
-      '<div><h3>تواصلي معنا</h3><p dir="ltr" style="text-align:right">hello@cosmetics.example</p><p dir="ltr" style="text-align:right">+20 100 000 0000</p><p>القاهرة، مصر</p><a href="about.html#contact">نموذج التواصل</a></div>' +
+      '<div><h3>تواصلي معنا</h3><a dir="ltr" style="justify-content:flex-end" href="mailto:ahmeddiab@mubarmijonline.com">ahmeddiab@mubarmijonline.com</a><a dir="ltr" style="justify-content:flex-end" href="tel:+201200588803">+20 120 058 8803</a><p>القاهرة، مصر</p><a href="about.html#contact">نموذج التواصل</a></div>' +
       '</div><div class="legal"><span>© 2026 Cosmetics. جميع الحقوق محفوظة.</span><span>نموذج تجريبي — المنتجات والأسعار والتقييمات عيّنات للعرض فقط.</span></div></div></footer>';
   }
 
